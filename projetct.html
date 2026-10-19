@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etika Profesi dalam Perspektif Islam - Awwwards Cinematic Deck</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js for 3D Floating Ring/Medal Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google Fonts: Space Grotesk & Syne & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&family=Amiri:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#0a0a0c',
+                            card: '#121216',
+                            accent: '#ff5522', // Signature Oryzo warm orange accent
+                            emerald: '#10b981',
+                            gold: '#facc15',
+                            text: '#f3f4f6',
+                            muted: '#8e8e9c'
+                        }
+                    },
+                    fontFamily: {
+                        grotesk: ['Space Grotesk', 'sans-serif'],
+                        syne: ['Syne', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        arabic: ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ececee;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 3D WebGL Canvas Overlay */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none; /* Interactive pointer pass-through */
+        }
+
+        /* Oryzo-style Big Kinetic Typography & Outline */
+        .title-huge {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 0.88;
+            text-transform: uppercase;
+        }
+
+        .text-stroke-white {
+            -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.35);
+            color: transparent;
+        }
+
+        .text-stroke-accent {
+            -webkit-text-stroke: 1.5px #ff5522;
+            color: transparent;
+        }
+
+        /* Video Showcase Cards Style */
+        .oryzo-card {
+            background: rgba(18, 18, 22, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .oryzo-card:hover {
+            border-color: rgba(255, 85, 34, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(255, 85, 34, 0.25);
+        }
+
+        /* Badge Tag like in Oryzo video */
+        .oryzo-badge {
+            background: #ff5522;
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .oryzo-badge-green {
+            background: #10b981;
+            color: #000000;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+        }
+
+        /* Smooth Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff5522;
+            border-radius: 4px;
+        }
+
+        /* Slide snap container for smooth video-like scroll experience */
+        .slide-section {
+            min-height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 4rem 1.5rem;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide-section.slide-active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Detail Modal Animation */
+        #detail-modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #detail-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #detail-modal .modal-content {
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #detail-modal.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Custom Interactive Image Frame Stack (Video Slide 4 feature) */
+        .image-stack-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .image-stack-card img {
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .image-stack-card:hover img {
+            transform: scale(1.08);
+        }
+
+        /* Retro Cyberpunk Canvas Grid in Video Slide 6 */
+        .grid-bg-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-accent selection:text-white grid-bg-pattern">
+
+    <div id="canvas-container"></div>
+
+    <header class="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-sm">
+        <!-- Logo / Deck Title -->
+        <div class="flex items-center gap-3">
+            <span class="font-grotesk font-extrabold text-xl tracking-tighter text-white uppercase flex items-center gap-2">
+                <i class="fa-solid fa-cube text-brand-accent"></i> ETIKA ISLAM
+            </span>
+        </div>
+
+        <!-- Navigation Links (Video Style) -->
+        <nav class="hidden md:flex items-center gap-8 text-xs font-grotesk tracking-widest text-gray-400 uppercase font-semibold">
+            <button onclick="scrollToSlide(0)" class="hover:text-white transition">01. OVERVIEW</button>
+            <button onclick="scrollToSlide(1)" class="hover:text-white transition">02. 4 DAYA</button>
+            <button onclick="scrollToSlide(2)" class="hover:text-white transition">03. 5 RASUL</button>
+            <button onclick="scrollToSlide(3)" class="hover:text-white transition">04. ETOS KERJA</button>
+            <button onclick="scrollToSlide(4)" class="hover:text-white transition">05. TUJUAN</button>
+            <button onclick="scrollToSlide(5)" class="hover:text-white transition">06. PRINSIP UMAR</button>
+        </nav>
+
+        <!-- Right Side Controls / Slide Indicator -->
+        <div class="flex items-center gap-3">
+            <div class="oryzo-card px-3 py-1.5 flex items-center gap-2 text-xs font-mono">
+                <span id="currentSlideLabel" class="text-brand-accent font-bold">01</span>
+                <span class="text-gray-600">/</span>
+                <span id="totalSlideLabel" class="text-gray-400">07</span>
+            </div>
+
+            <!-- Quick Prev/Next buttons -->
+            <div class="flex items-center gap-1">
+                <button onclick="prevSlide()" class="w-9 h-9 rounded-lg oryzo-card flex items-center justify-center text-gray-300 hover:text-white hover:bg-brand-accent transition">
+                    <i class="fa-solid fa-chevron-up text-xs"></i>
+                </button>
+                <button onclick="nextSlide()" class="w-9 h-9 rounded-lg oryzo-card flex items-center justify-center text-gray-300 hover:text-white hover:bg-brand-accent transition">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                <button id="autoPlayToggle" onclick="toggleAutoplay()" class="w-9 h-9 rounded-lg oryzo-card flex items-center justify-center text-brand-accent hover:bg-brand-accent/20 transition" title="Toggle Auto-Presentation">
+                    <i class="fa-solid fa-play text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Floating Scroll Prompt Badge (Like Video "SCROLL TO NAVIGATE") -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+        <div class="oryzo-card px-4 py-2 rounded-full flex items-center gap-3 text-[11px] font-grotesk tracking-widest text-gray-300 uppercase shadow-2xl border border-white/10 animate-bounce">
+            <span class="w-2 h-2 rounded-full bg-brand-accent animate-ping"></span>
+            <span>SCROLL OR USE ARROWS TO NAVIGATE</span>
+            <i class="fa-solid fa-arrow-down text-brand-accent"></i>
+        </div>
+    </div>
+
+    <!-- MAIN SLIDE PRESENTATION CONTENT -->
+    <main class="w-full relative z-10">
+
+        <section id="slide-1" class="slide-section flex items-center justify-between">
+            <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Left Text Block (Big Statement - Video Style "ISN'T JUST A COASTER") -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <span class="oryzo-badge">JRPP VOL. 5 NO. 1 (2022)</span>
+                        <span class="text-xs font-mono text-gray-400 uppercase tracking-widest">// ISLAMIC ETHICS &amp; INTEGRITY</span>
+                    </div>
+
+                    <h1 class="title-huge text-5xl sm:text-7xl lg:text-8xl text-white">
+                        BEKERJA <br>
+                        <span class="text-brand-accent">BUKAN KEBETULAN,</span> <br>
+                        <span class="text-stroke-white">TAPI IBADAH.</span>
+                    </h1>
+
+                    <p class="text-gray-300 text-sm sm:text-base max-w-xl font-light leading-relaxed">
+                        Landasan Etika Profesi Islami: Menyatukan Keahlian Teknis (Fatanah) dan Integritas Spiritual Berdasarkan Al-Qur'an dan Sunnah.
+                    </p>
+
+                    <!-- Feature Tags Bar -->
+                    <div class="pt-4 flex flex-wrap items-center gap-3 font-grotesk text-xs text-gray-400">
+                        <span class="px-3 py-1.5 rounded-md bg-white/5 border border-white/10"><i class="fa-solid fa-check text-brand-accent mr-2"></i>Amanah &amp; Shiddiq</span>
+                        <span class="px-3 py-1.5 rounded-md bg-white/5 border border-white/10"><i class="fa-solid fa-check text-brand-accent mr-2"></i>4 Daya Pokok</span>
+                        <span class="px-3 py-1.5 rounded-md bg-white/5 border border-white/10"><i class="fa-solid fa-check text-brand-accent mr-2"></i>Etos Kerja Islami</span>
+                    </div>
+                </div>
+
+                <!-- Right Side Empty Space reserved for 3D Ring Object rendered in Three.js Canvas -->
+                <div class="lg:col-span-5 hidden lg:block h-[450px] relative pointer-events-auto">
+                    <div class="absolute bottom-4 right-4 text-right">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase block">INTERACTIVE 3D MODEL</span>
+                        <span class="text-xs font-grotesk text-brand-accent font-bold">DRAG MOUSE TO ROTATE RING</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="slide-2" class="slide-section">
+            <div class="max-w-7xl mx-auto w-full">
+                <!-- Header Title -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-white/10 pb-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="oryzo-badge-green">BAB 01</span>
+                            <span class="text-xs font-mono text-gray-400">DEFINISI &amp; MANUSIA</span>
+                        </div>
+                        <h2 class="title-huge text-3xl sm:text-5xl text-white">LANDASAN ETIKA &amp; 4 DAYA POKOK</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-400 max-w-md mt-4 md:mt-0 font-light">
+                        Etika profesi sebagai bagian dari etika sosial yang mengatur pelaksanaan tugas secara bertanggung jawab dan bermartabat.
+                    </p>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left Column: Key Definition Card & Quran Quote -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div onclick="openCardModal('Etika Profesi dalam Islam', 'LANDASAN ETIKA', 'Etika profesi dalam Islam adalah seperangkat norma dan prinsip moral yang bersumber dari Al-Qur’an dan As-Sunnah untuk mengarahkan perilaku seorang profesional dalam menjalankan tugasnya. Bekerja dalam Islam dipandang sebagai keniscayaan eksistensi dan sarana utama mendekatkan diri kepada Allah (taqarrub). Pekerjaan yang dilandasi niat ikhlas bukan hanya menghasilkan manfaat material di dunia, melainkan juga dinilai sebagai amal saleh yang memunculkan keberkahan dan derajat mulia di akhirat.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Prinsip Ibadah & Tanggung Jawab Sosial', 'QS. Al-Kahfi: 110', 'قُلْ اINَّمَآ اَنَا۠ بَشَرٌ مِّثْلُكُمْ يُوْحٰىٓ اِلَيَّ اَنَّمَآ اِلٰهُكُمْ اِلٰهٌ وَّاحِدٌۚ فَمَنْ كَانَ يَرْجُوْا لِقَاۤءَ رَبِّهٖ فَلْيَعْمَلْ عَمَلًا صَالِحًا وَّلَا يُشْرِكْ بِعِبَادَةِ رَبِّهٖٓ اَحَدًا')" class="oryzo-card p-6 border-l-4 border-l-brand-accent cursor-pointer group">
+                            <span class="text-xs font-mono text-brand-accent uppercase block mb-2">// LANDASAN UTAMA (KLIK DETAIL)</span>
+                            <h3 class="font-grotesk text-xl font-bold text-white mb-2 group-hover:text-brand-accent transition">"Aku Berbuat, Maka Aku Ada"</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed mb-4">
+                                Bekerja dalam Islam bukan sekadar rutinitas pencarian rezeki, melainkan keniscayaan eksistensi dan bentuk ibadah nyata di hadapan Allah SWT.
+                            </p>
+                            <div class="p-3 bg-black/40 rounded-lg border border-white/5 flex items-center justify-between">
+                                <span class="font-arabic text-amber-300 text-lg">QS. Al-Kahfi: 110</span>
+                                <span class="text-[10px] font-mono text-gray-400">AMAL SOLEH = DERAJAT</span>
+                            </div>
+                        </div>
+
+                        <!-- Image Card -->
+                        <div class="image-stack-card h-52 w-full relative">
+                            <img src="https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80" alt="Islamic Focus & Ethics" class="w-full h-full object-cover filter brightness-90">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                            <div class="absolute bottom-3 left-4 right-4 flex justify-between items-center text-xs font-grotesk text-white">
+                                <span>INTEGRITAS PROFESI ISLAM</span>
+                                <span class="oryzo-badge">JRPP 2022</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive 4 Daya Pokok Cards Grid -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Daya 1 -->
+                        <div onclick="openCardModal('Daya Fisik Manusia', '4 DAYA POKOK #1', 'Daya fisik merupakan karunia biologis yang menghasilkan ketangkasan, kekuatan tubuh, dan keterampilan teknis motorik. Dalam konteks etika profesi Islam, daya fisik yang sehat dan terlatih menjadi sarana penting untuk mengeksekusi pekerjaan secara langsung, cepat, efisien, dan tepat sasaran. Islam memuji mukmin yang kuat dan cekatan dalam menyelesaikan tanggung jawab fisik pekerjaannya.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Eksekusi Teknis & Ketangkasan Kerja', 'Aktivitas & Keterampilan Praktis')" class="oryzo-card p-5 hover:border-blue-500/50 group cursor-pointer">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl font-grotesk font-extrabold text-blue-400">01</span>
+                                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-mono">KLIK UNTUK DETAIL</span>
+                            </div>
+                            <h4 class="font-grotesk font-bold text-white text-base mb-1 group-hover:text-blue-400 transition">Daya Fisik</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Menghasilkan aktivitas dan keterampilan motorik teknis dalam pekerjaan.
+                            </p>
+                        </div>
+
+                        <!-- Daya 2 -->
+                        <div onclick="openCardModal('Daya Pikir Manusia', '4 DAYA POKOK #2', 'Daya pikir (akal) adalah anugerah terbesar manusia untuk melakukan penalaran kritis, analisis logis, riset mendalam, serta penciptaan inovasi baru. Dalam etika Islam, akal berfungsi untuk membedakan kebenaran dari kebatilan, mencari solusi efisien atas problem profesionalisme yang rumit, serta terus memajukan ilmu pengetahuan demi kemaslahatan masyarakat.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Riset, Inovasi & Solusi Kritis', 'Pengembangan Ilmu Pengetahuan')" class="oryzo-card p-5 hover:border-emerald-500/50 group cursor-pointer">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl font-grotesk font-extrabold text-emerald-400">02</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">KLIK UNTUK DETAIL</span>
+                            </div>
+                            <h4 class="font-grotesk font-bold text-white text-base mb-1 group-hover:text-emerald-400 transition">Daya Pikir</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Mendorong penciptaan ilmu pengetahuan, penalaran kritis, dan inovasi.
+                            </p>
+                        </div>
+
+                        <!-- Daya 3 -->
+                        <div onclick="openCardModal('Daya Kalbu Manusia', '4 DAYA POKOK #3', 'Daya kalbu (hati nurani) merupakan pusat keimanan, spiritualitas, rasa keindahan, dan pertimbangan moral yang paling dalam. Kalbu bertindak sebagai kompas spiritual yang memandu seorang profesional agar bertindak jujur, memelihara ikhlas, serta menolak segala bentuk godaan penyimpangan etika seperti suap dan manipulasi.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Kompas Moral & Spiritual Keimanan', 'Pusat Keimanan & Hubungan Ilahiah')" class="oryzo-card p-5 hover:border-purple-500/50 group cursor-pointer">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl font-grotesk font-extrabold text-purple-400">03</span>
+                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono">KLIK UNTUK DETAIL</span>
+                            </div>
+                            <h4 class="font-grotesk font-bold text-white text-base mb-1 group-hover:text-purple-400 transition">Daya Kalbu</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Tempat iman, ekspresi keindahan, pertimbangan etika, dan hubungan dengan Allah.
+                            </p>
+                        </div>
+
+                        <!-- Daya 4 -->
+                        <div onclick="openCardModal('Daya Hidup Manusia', '4 DAYA POKOK #4', 'Daya hidup (vitalitas batin) menghasilkan daya tahan emosi, resiliensi, dan semangat juang yang pantang menyerah. Dalam dunia kerja profesional yang penuh dengan hambatan dan dinamika, daya hidup menjaga stabilitas emosional, memberikan energi ketahanan mental, serta memotivasi seseorang untuk bangkit kembali melampaui segala tantangan.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Resiliensi & Ketahanan Mental', 'Semangat Juang Top Profesi')" class="oryzo-card p-5 hover:border-amber-500/50 group cursor-pointer">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl font-grotesk font-extrabold text-amber-400">04</span>
+                                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono">KLIK UNTUK DETAIL</span>
+                            </div>
+                            <h4 class="font-grotesk font-bold text-white text-base mb-1 group-hover:text-amber-400 transition">Daya Hidup</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Menghasilkan semangat juang dan ketahanan mental menghadapi tantangan.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-3" class="slide-section">
+            <div class="max-w-7xl mx-auto w-full">
+                <!-- Header Title -->
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-accent/20 border border-brand-accent/40 text-brand-accent text-xs font-grotesk uppercase mb-3">
+                        <i class="fa-solid fa-star"></i> BAB 02: TELADAN NUBUWWAH
+                    </div>
+                    <h2 class="title-huge text-3xl sm:text-5xl text-white">5 SIFAT RASULULLAH DALAM BERPROFESI</h2>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-2">Prinsip etika universal yang wajib diintegrasikan oleh setiap profesional muslim.</p>
+                </div>
+
+                <!-- 5 Pillars Grid Showcase -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    
+                    <!-- Shiddiq -->
+                    <div onclick="openCardModal('Shiddiq (Jujur & Benar)', 'SIFAT RASULULLAH #1', 'Shiddiq menghendaki keselarasan mutlak antara niat di dalam hati, perkataan lisan, dan tindakan nyata dalam dunia kerja. Seorang profesional berkarakter Shiddiq selalu mengedepankan ketransparanan, kejujuran laporan, serta menolak keras manipulasi data, kebohongan publik, maupun kecurangan bisnis demi keuntungan sepihak.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Integritas Kebenaran Mutlak', 'QS. At-Taubah: 119', 'يٰٓاَيُّهَا الَّذِيْنَ اٰمَنُوا اتَّقُوا اللّٰهَ وَكُوْنُوْا مَعَ الصّٰدِقِيْنَ')" class="oryzo-card p-5 flex flex-col justify-between h-[340px] hover:scale-105 transition duration-300 group cursor-pointer">
+                        <div>
+                            <span class="oryzo-badge">01</span>
+                            <h3 class="font-grotesk text-2xl font-extrabold text-white mt-3 group-hover:text-brand-accent transition">Shiddiq</h3>
+                            <span class="text-xs font-mono text-brand-accent block mb-3">JUJUR & BENAR</span>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Niat, kata, dan tindakan berorientasi pada kebenaran dan transparansi mutlak.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 block">QS. At-Taubah: 119</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-brand-accent"></i>
+                        </div>
+                    </div>
+
+                    <!-- Amanah -->
+                    <div onclick="openCardModal('Amanah (Tanggung Jawab & Akuntabel)', 'SIFAT RASULULLAH #2', 'Amanah berarti memelihara kepercayaan yang diberikan oleh atasan, klien, maupun publik. Dalam perspektif Islam, setiap jabatan, kewenangan, dan tugas profesi adalah amanah Ilahiah yang kelak akan dimintai pertanggungjawaban di hadapan Allah SWT. Sikap Amanah mendorong komitmen penuh dalam menepati janji, menjaga rahasia instansi, dan menyelesaikan tugas sesuai standar.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Komitmen Tanggung Jawab Tugas', 'QS. An-Nisa: 58', 'اِنَّ اللّٰهَ يَأْمُرُكُمْ اَنْ تُؤَدُّوا الْاَمٰنٰتِ اِلٰٓى اَهْلِهَا ۙ وَاِذَا حَكَمْتُمْ بَيْنَ النَّاسِ اَنْ تَحْكُمُوْا بِالْعَدْلِ')" class="oryzo-card p-5 flex flex-col justify-between h-[340px] hover:scale-105 transition duration-300 group cursor-pointer">
+                        <div>
+                            <span class="oryzo-badge-green">02</span>
+                            <h3 class="font-grotesk text-2xl font-extrabold text-white mt-3 group-hover:text-emerald-400 transition">Amanah</h3>
+                            <span class="text-xs font-mono text-emerald-400 block mb-3">TANGGUNG JAWAB</span>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Menjaga komitmen tugas, memelihara kepercayaan publik, dan menepati seluruh janji.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 block">QS. An-Nisa: 58</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-emerald-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tabligh -->
+                    <div onclick="openCardModal('Tabligh (Komunikatif & Open-Government)', 'SIFAT RASULULLAH #3', 'Tabligh adalah kemampuan menyampaikan gagasan, instruksi, serta edukasi kerja secara efektif, terbuka, transparan, dan tidak ada yang disembunyikan secara licik. Dalam manajemen modern, Tabligh diterjemahkan sebagai pola komunikasi publik yang santun, edukatif, serta objektif dalam menyampaikan laporan kinerja dan realita proyek.', 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1200&q=80', 'Komunikasi Terbuka & Proporsional', 'QS. Al-Jin: 28', 'لِّيَعْلَمَ اَنْ قَدْ اَبْلَغُوْا رِسٰلٰتِ رَبِّهِمْ وَاَحَاطَ بِمَا لَدَيْهِمْ وَاَحْصٰى كُلَّ شَيْءٍ عَدَدًا')" class="oryzo-card p-5 flex flex-col justify-between h-[340px] hover:scale-105 transition duration-300 group cursor-pointer">
+                        <div>
+                            <span class="px-2 py-0.5 bg-purple-500 text-white rounded text-[10px] font-bold">03</span>
+                            <h3 class="font-grotesk text-2xl font-extrabold text-white mt-3 group-hover:text-purple-400 transition">Tabligh</h3>
+                            <span class="text-xs font-mono text-purple-400 block mb-3">KOMUNIKATIF</span>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Menyampaikan fakta dan informasi yang proporsional serta transparan.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 block">QS. Al-Jin: 28</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-purple-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Fatanah -->
+                    <div onclick="openCardModal('Fatanah (Cerdas, Kompeten & Inovatif)', 'SIFAT RASULULLAH #4', 'Fatanah melambangkan kapasitas intelektual, kecerdasan profesional, keahlian teknis tinggi, dan kebijaksanaan dalam memecahkan masalah. Seorang profesional yang Fatanah tidak hanya bekerja keras tetapi juga bekerja cerdas (work smart), menguasai perkembangan teknologi, serta cekatan dalam mengambil keputusan krusial.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Kecerdasan & Kapasitas Unggul', 'QS. Yusuf: 55', 'قَالَ اجْعَلْنِيْ عَلٰى خَزَاۤىِٕنِ الْاَرْضِۚ اِنِّيْ حَفِيْظٌ عَلِيْمٌ')" class="oryzo-card p-5 flex flex-col justify-between h-[340px] hover:scale-105 transition duration-300 group cursor-pointer">
+                        <div>
+                            <span class="px-2 py-0.5 bg-blue-500 text-white rounded text-[10px] font-bold">04</span>
+                            <h3 class="font-grotesk text-2xl font-extrabold text-white mt-3 group-hover:text-blue-400 transition">Fatanah</h3>
+                            <span class="text-xs font-mono text-blue-400 block mb-3">CERDAS & KOMPETEN</span>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Memiliki keahlian teknis dan kapasitas intelektual profesional yang tinggi.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 block">QS. Yusuf: 55</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-blue-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Istiqamah -->
+                    <div onclick="openCardModal('Istiqamah (Konsisten & Professional Standards)', 'SIFAT RASULULLAH #5', 'Istiqamah adalah keteguhan prinsip moral dan konsistensi tinggi dalam mempertahankan mutu kinerja terbaik secara kontinu. Dalam iklim kerja, Istiqamah tercermin dari komitmen menjaga standar SOP, disiplin waktu, dan tidak mudah goyah oleh godaan atau hambatan teknis yang dihadapi sepanjang waktu.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Konsistensi Mutu & Prinsip Taat Asas', 'QS. Fussilat: 30', 'اِنَّ الَّذِيْنَ قَالُوْا رَبُّنَا اللّٰهُ ثُمَّ اسْتَقَامُوْا تَتَنَزَّلُ عَلَيْهِمُ الْمَلٰۤىِٕكَةُ اَلَّا تَخَافُوْا وَلَا تَحْزَنُوْا وَاَبْشِرُوْا بِالْجَنَّةِ الَّتِيْ كُنْتُمْ تُوْعَدُوْنَ')" class="oryzo-card p-5 flex flex-col justify-between h-[340px] hover:scale-105 transition duration-300 group cursor-pointer">
+                        <div>
+                            <span class="px-2 py-0.5 bg-rose-500 text-white rounded text-[10px] font-bold">05</span>
+                            <h3 class="font-grotesk text-2xl font-extrabold text-white mt-3 group-hover:text-rose-400 transition">Istiqamah</h3>
+                            <span class="text-xs font-mono text-rose-400 block mb-3">KONSISTEN</span>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Teguh pendirian, taat asas dalam kebaikan, dan konsisten menjaga standar mutu.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 block">QS. Fussilat: 30</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-rose-400"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-4" class="slide-section">
+            <div class="max-w-7xl mx-auto w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left Column: Title & Neon Image Preview -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="flex items-center gap-2">
+                            <span class="oryzo-badge">BAB 03</span>
+                            <span class="text-xs font-mono text-brand-accent">WORK ETHIC SYSTEM</span>
+                        </div>
+
+                        <h2 class="title-huge text-4xl sm:text-6xl text-white">
+                            CIRI-CIRI <br>
+                            <span class="text-brand-accent">ETOS KERJA</span> <br>
+                            <span class="text-stroke-white">ISLAMI</span>
+                        </h2>
+
+                        <p class="text-xs sm:text-sm text-gray-300 font-light leading-relaxed">
+                            Mentalitas dan daya dorong batiniah yang membedakan seorang profesional biasa dengan profesional yang dijiwai spirit keimanan.
+                        </p>
+
+                        <!-- Video Cyberpunk/Neon Image Accent -->
+                        <div class="image-stack-card h-48 border border-brand-accent/30 relative">
+                            <img src="https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80" alt="Islamic Work Ethic" class="w-full h-full object-cover filter contrast-125">
+                            <div class="absolute inset-0 bg-gradient-to-r from-brand-accent/20 to-transparent"></div>
+                            <div class="absolute top-3 left-3 bg-black/80 px-2 py-1 rounded text-[10px] font-mono text-brand-accent">
+                                PERFORMANCE &amp; MORALITY
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Accordion-style List (5 Features) -->
+                    <div class="lg:col-span-7 space-y-3">
+                        
+                        <div onclick="openCardModal('Kecanduan Terhadap Waktu (Time Management)', 'ETOS KERJA #1', 'Pekerja muslim memandang waktu sebagai nikmat dan modal Ilahiah terpenting yang tidak dapat diputar kembali. Penyesalan atas waktu melahirkan sikap melarang penundaan pekerjaan (procrastination), memanfaatkan tiap detik untuk efisiensi produktivitas, serta mengutamakan pencapaian target kerja yang bermanfaat.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Pemanfaatan Waktu Efektif', 'QS. Al-\'Ashr: 1–3', 'وَالْعَصْرِۙ اِنَّ الْاِنْسَانَ لَفِي خُسْرٍۙ اِلَّا الَّذِيْنَ اٰمَنُوْا وَعَمِلُوا الصّٰلِحٰتِ وَتَوَاصَوْا بِالْحَقِّ ەۙ وَتَوَاصَوْا بِالصَّبْرِ')" class="oryzo-card p-4 flex items-start gap-4 hover:border-brand-accent transition cursor-pointer">
+                            <div class="w-8 h-8 rounded bg-brand-accent/20 text-brand-accent font-grotesk font-bold flex items-center justify-center shrink-0">1</div>
+                            <div>
+                                <h3 class="font-grotesk font-bold text-white text-sm flex items-center gap-2">
+                                    Kecanduan Terhadap Waktu
+                                    <span class="text-[10px] font-mono text-amber-400">(QS. Al-'Ashr: 1–3)</span>
+                                </h3>
+                                <p class="text-xs text-gray-400 mt-1">Sangat menghargai detik demi detik sebagai aset Ilahiah yang tak terulang untuk produktivitas positif.</p>
+                            </div>
+                        </div>
+
+                        <div onclick="openCardModal('Moralitas Bersih & Niat Ikhlas', 'ETOS KERJA #2', 'Setiap aktivitas profesional diniatkan semata-mata mengharap mardhatillah (keridaan Allah). Moralitas bersih menjadi perisai batin utama yang membentengi individu dari godaan praktik korupsi, gratifikasi, serta manipulasi wewenang demi kepentingan pribadi.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Niat Tulus & Benteng Integritas', 'Niat Ikhlas Karena Allah')" class="oryzo-card p-4 flex items-start gap-4 hover:border-brand-accent transition cursor-pointer">
+                            <div class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-400 font-grotesk font-bold flex items-center justify-center shrink-0">2</div>
+                            <div>
+                                <h3 class="font-grotesk font-bold text-white text-sm">Moralitas Bersih &amp; Niat Ikhlas</h3>
+                                <p class="text-xs text-gray-400 mt-1">Bekerja tulus semata-mata karena Allah SWT sebagai perisai batin utama penangkal kecurangan dan suap.</p>
+                            </div>
+                        </div>
+
+                        <div onclick="openCardModal('Kecanduan Kejujuran (Integritas Naluriah)', 'ETOS KERJA #3', 'Dorongan nurani yang senantiasa haus akan kebenaran dan kejujuran dalam segala situasi. Pekerja yang memiliki dorongan ini akan merasa tidak nyaman dan risih jika harus melakukan kebohongan atau manipulasi sekecil apapun dalam pekerjaannya.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Integritas Naluriah', 'Prinsip Ketagihan Berbuat Benar')" class="oryzo-card p-4 flex items-start gap-4 hover:border-brand-accent transition cursor-pointer">
+                            <div class="w-8 h-8 rounded bg-blue-500/20 text-blue-400 font-grotesk font-bold flex items-center justify-center shrink-0">3</div>
+                            <div>
+                                <h3 class="font-grotesk font-bold text-white text-sm">Kecanduan Kejujuran (Integritas Mutlak)</h3>
+                                <p class="text-xs text-gray-400 mt-1">Dorongan naluriah yang selalu haus berbuat benar dan merasa risih/tertekan saat melanggar etika.</p>
+                            </div>
+                        </div>
+
+                        <div onclick="openCardModal('Memiliki Komitmen & Daya Juang Tinggi', 'ETOS KERJA #4', 'Keyakinan bulat yang menggerakkan daya juang pantang menyerah. Pekerja tidak gampang mengeluh atau menyalahkan keadaan ketika mengalami rintangan, melainkan fokus mencari jalan keluar dan bertindak proaktif.', 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1200&q=80', 'Daya Dorong Eksekusi Tantangan', 'Pantang Menyerah')" class="oryzo-card p-4 flex items-start gap-4 hover:border-brand-accent transition cursor-pointer">
+                            <div class="w-8 h-8 rounded bg-purple-500/20 text-purple-400 font-grotesk font-bold flex items-center justify-center shrink-0">4</div>
+                            <div>
+                                <h3 class="font-grotesk font-bold text-white text-sm">Memiliki Komitmen &amp; Daya Juang</h3>
+                                <p class="text-xs text-gray-400 mt-1">Keyakinan mendalam yang menggerakkan aksi nyata tanpa mudah menyerah atau menyalahkan keadaan.</p>
+                            </div>
+                        </div>
+
+                        <div onclick="openCardModal('Istiqamah & Ketahanan Emosional', 'ETOS KERJA #5', 'Kecerdasan emosional dalam mengendalikan emosi diri saat berada di bawah tekanan tinggi, diimbangi dengan stabilitas performa kerja yang konsisten dari waktu ke waktu tanpa dipengaruhi oleh fluktuasi kondisi emosi sesaat.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Manajemen Emosi & Konsistensi', 'Ketahanan Karakter Kerja')" class="oryzo-card p-4 flex items-start gap-4 hover:border-brand-accent transition cursor-pointer">
+                            <div class="w-8 h-8 rounded bg-rose-500/20 text-rose-400 font-grotesk font-bold flex items-center justify-center shrink-0">5</div>
+                            <div>
+                                <h3 class="font-grotesk font-bold text-white text-sm">Istiqamah &amp; Ketahanan Emosional</h3>
+                                <p class="text-xs text-gray-400 mt-1">Konsistensi mutu kerja jangka panjang dan kecerdasan mengontrol emosi dalam kondisi tertekan.</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-5" class="slide-section">
+            <div class="max-w-7xl mx-auto w-full">
+                <!-- Title Header -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-white/10 pb-6">
+                    <div>
+                        <span class="oryzo-badge mb-2 inline-block">BAB 04</span>
+                        <h2 class="title-huge text-3xl sm:text-5xl text-white">5 TUJUAN IDEAL BEKERJA IN ISLAM</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-400 max-w-md mt-4 md:mt-0 font-light">
+                        Bekerja bukan sekadar pemenuhan materi perut semata, melainkan orientasi holistik dunia dan akhirat.
+                    </p>
+                </div>
+
+                <!-- Goal Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Goal 1 -->
+                    <div onclick="openCardModal('1. Ibadah & Mardhatillah', 'TUJUAN BEKERJA #1', 'Dalam Islam, aktivitas bisnis dan pekerjaan hendaknya tidak hanya mengejar kepentingan duniawi yang profan dan sementara, namun sekaligus secara simultan mengejar kepentingan ukhrawi yang kekal. Bekerja ditujukan untuk litta\'abbudiyah (penghambaan diri) kepada Allah SWT Dzat Maha Penguasa dan Pemberi Rezeki. Inilah tujuan pokok penciptaan manusia.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Meraih Keridaan Allah (Mardhatillah)', 'JRPP Vol 5 No 1 Hlm 9-10')" class="oryzo-card p-6 border-t-2 border-t-brand-accent relative overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+                        <span class="text-xs font-mono text-brand-accent block mb-2">01 // PRIMA (KLIK DETAIL)</span>
+                        <h3 class="font-grotesk text-xl font-bold text-white mb-2">Ibadah &amp; Mardhatillah</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Mencari keridaan Allah SWT secara penuh sehingga setiap tetes keringat bernilai pahala akhirat secara simultan.
+                        </p>
+                    </div>
+
+                    <!-- Goal 2 -->
+                    <div onclick="openCardModal('2. Memenuhi Kebutuhan Hidup', 'TUJUAN BEKERJA #2', 'Manusia adalah makhluk monodualis (menyatu unsur fisik dan psikis). Unsur psikis membutuhkan pengakuan, rasa aman, dan tenang. Unsur fisik membutuhkan makanan, pakaian untuk melindungi dari cuaca, serta tempat tinggal. Bekerja memenuhi energi kedua unsur ini secara seimbang dan proporsional.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Keseimbangan Fisik & Psikis Monodualis', 'JRPP Vol 5 No 1 Hlm 10')" class="oryzo-card p-6 border-t-2 border-t-emerald-400 relative overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+                        <span class="text-xs font-mono text-emerald-400 block mb-2">02 // KEBUTUHAN (KLIK DETAIL)</span>
+                        <h3 class="font-grotesk text-xl font-bold text-white mb-2">Memenuhi Kebutuhan Hidup</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menjaga keseimbangan raga dan jiwa secara proporsional, wajar, dan terhindar dari pemenuhan haram.
+                        </p>
+                    </div>
+
+                    <!-- Goal 3 -->
+                    <div onclick="openCardModal('3. Memenuhi Kebutuhan Keluarga', 'TUJUAN BEKERJA #3', 'Kepemimpinan suami/kepala keluarga melahirkan tanggung jawab memberikan nafkah lahiriah. Berdasarkan HR. Bukhari-Muslim, belanja yang dikeluarkan untuk istri dan keluarga dengan mengharap pahala tercatat sebagai sedekah. Juga sesuai QS. Al-Baqarah: 233 mengenai kewajiban memberi makan dan pakaian secara ma\'ruf.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Tanggung Jawab Pemimpin & Sedekah Utama', 'QS. Al-Baqarah: 233 & HR. Bukhari-Muslim', 'وَعَلَى الْمَوْلُوْدِ لَهٗ رِزْقُهُنَّ وَكِسْوَتُهُنَّ بِالْمَعْرُوْفِ')" class="oryzo-card p-6 border-t-2 border-t-blue-400 relative overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+                        <span class="text-xs font-mono text-blue-400 block mb-2">03 // TANGGUNG JAWAB (KLIK DETAIL)</span>
+                        <h3 class="font-grotesk text-xl font-bold text-white mb-2">Nafkah Keluarga</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menjalankan amanah utama pemenuhan nafkah keluarga sesuai <span class="text-amber-300 font-semibold">(QS. Al-Baqarah: 233 &amp; HR. Bukhari-Muslim)</span>.
+                        </p>
+                    </div>
+
+                    <!-- Goal 4 -->
+                    <div onclick="openCardModal('4. Memenuhi Kepentingan Amal Sosial', 'TUJUAN BEKERJA #4', 'Islam mengajarkan kedermawanan: tangan di atas (memberi) lebih mulia dari tangan di bawah (meminta-minta). Kebutuhan manusia bersifat kompleks, dan untuk melakukan ibadah sosial (zakat, infak, sedekah, wakaf) seseorang memerlukan kemauan kuat serta kepemilikan harta yang cukup (ghina) dari hasil kerja keras.', 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1200&q=80', 'Prinsip Tangan Di Atas & Kemampuan Ghina', 'JRPP Vol 5 No 1 Hlm 10')" class="oryzo-card p-6 border-t-2 border-t-purple-400 relative overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+                        <span class="text-xs font-mono text-purple-400 block mb-2">04 // KEMANFAATAN (KLIK DETAIL)</span>
+                        <h3 class="font-grotesk text-xl font-bold text-white mb-2">Kepentingan Amal Sosial</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menebar kebaikan bagi masyarakat luas melalui Zakat, Infak, Sedekah, &amp; Wakaf ("Tangan di atas lebih baik").
+                        </p>
+                    </div>
+
+                    <!-- Goal 5 -->
+                    <div onclick="openCardModal('5. Membangun Kemandirian (\'Izzah)', 'TUJUAN BEKERJA #5', 'Islam menyatakan perang melawan kemiskinan demi melindungi keselamatan akidah dan moral. Setiap individu diharapkan mampu memenuhi kebutuhan pokok (pangan, sandang, papan) secara mandiri lewat pekerjaannya, guna menjaga kehormatan martabat dari meminta-minta serta mengentaskan kemiskinan.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Perang Terhadap Kemiskinan & Perjagaan Akidah', 'JRPP Vol 5 No 1 Hlm 10-11')" class="oryzo-card p-6 border-t-2 border-t-amber-400 md:col-span-2 lg:col-span-2 relative overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+                        <span class="text-xs font-mono text-amber-400 block mb-2">05 // KEHORMATAN DIRI (KLIK DETAIL)</span>
+                        <h3 class="font-grotesk text-xl font-bold text-white mb-2">Membangun Kemandirian &amp; Kehormatan ('Izzah)</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menjaga kehormatan martabat diri dari meminta-minta, menghapus ketergantungan finansial, serta aktif mengentaskan kemiskinan di masyarakat.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-6" class="slide-section">
+            <div class="max-w-7xl mx-auto w-full">
+                <!-- Title Header -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-white/10 pb-6">
+                    <div>
+                        <span class="oryzo-badge-green mb-2 inline-block">BAB 05</span>
+                        <h2 class="title-huge text-3xl sm:text-5xl text-white">PRINSIP UMAR BIN AL-KHATHAB RA</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-400 max-w-md mt-4 md:mt-0 font-light">
+                        Pelajaran etika kepemimpinan dan akuntabilitas aparatur/pekerja dari Khalifah Umar RA (Klik kartu untuk detail dari jurnal).
+                    </p>
+                </div>
+
+                <!-- 9 Principles Cards from PDF -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    
+                    <div onclick="openCardModal('1. Pengajaran Agama & Sunnah', 'PRINSIP UMAR #1', 'Tugas utama pegawai/pekerja adalah mengajarkan umat Islam tentang ajaran agama mereka dan Sunnah Nabi Muhammad SAW. Umar menegaskan: Aku tidak mengutus mereka untuk mengambil harta atau badan kalian, melainkan untuk mengajarkan agama dan sunnah.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Edukasi Syariah & Sunnah', 'JRPP Vol 5 No 1 Hlm 11')" class="oryzo-card p-6 border border-white/10 hover:border-amber-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-amber-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">1. Pengajaran &amp; Sunnah</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Mengedukasi masyarakat tentang ajaran agama Islam dan Sunnah Nabi SAW.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('2. Menegakkan Syi\'ar Agama', 'PRINSIP UMAR #2', 'Tidak cukup hanya pengajaran teori, pegawai harus menerapkan syiar dalam realita masyarakat. Hal paling berhak ditegakkan pimpinan adalah hak-hak Allah atas rakyatnya serta mengajak pada ketaatan dan menjauhi maksiat.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Aplikasi Nyata Aturan Allah', 'JRPP Vol 5 No 1 Hlm 11')" class="oryzo-card p-6 border border-white/10 hover:border-brand-accent transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-brand-accent text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">2. Menegakkan Syi'ar Agama</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menerapkan aturan agama dalam realita kehidupan dan memfasilitasi shalat jamaah.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('3. Pengumpulan Pajak & Distribusi Adil', 'PRINSIP UMAR #3', 'Umar bertanggung jawab penuh atas pengelolaan keuangan daerah dan bertindak tegas atas kelalaian. Pengumpulan pajak dan rampasan perang harus dilakukan secara sungguh-sungguh dan didistribusikan secara adil.', 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1200&q=80', 'Akuntabilitas Keuangan Publik', 'JRPP Vol 5 No 1 Hlm 11')" class="oryzo-card p-6 border border-white/10 hover:border-blue-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-blue-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">3. Pengelolaan Pajak &amp; Keuangan</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Mengumpulkan pajak dan mendistribusikannya secara adil tanpa kelalaian.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('4. Menghindari Pemameran Kekayaan', 'PRINSIP UMAR #4', 'Surat Umar kepada Abu Musa Al-Asy\'ary: Pemimpin paling bahagia adalah yang membahagiakan rakyatnya, dan yang paling sengsara adalah yang menyengsarakan rakyatnya. Pemimpin tidak boleh berbuat menyimpang/pamer kekayaan agar rakyat tidak ikut menyimpang.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Keteladanan Kesederhanaan', 'Surat Umar RA ke Abu Musa Al-Asy\'ary')" class="oryzo-card p-6 border border-white/10 hover:border-purple-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-purple-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">4. Rendah Hati &amp; Anti-Kesombongan</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menjauhi pamer kekayaan dan memastikan perilaku pejabat tidak merusak moral publik.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('5. Memenuhi Kebutuhan Umat', 'PRINSIP UMAR #5', 'Pegawai diwajibkan memenuhi kebutuhan pokok masyarakat di rumah dan keluarga mereka. Umar berpesan bahwa sifat bakhil/kebakhilan pimpinan tidak akan memperbaiki akhlak masyarakat dan tidak mengenyangkan yang kelaparan.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Pelayanan Kesejahteraan Masyarakat', 'JRPP Vol 5 No 1 Hlm 11')" class="oryzo-card p-6 border border-white/10 hover:border-emerald-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-emerald-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">5. Memenuhi Kebutuhan Masyarakat</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Memastikan pemenuhan pangan dan kebutuhan mendasar warga tanpa kebakhilan.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('6. Perlindungan Sosial & Kasih Sayang', 'PRINSIP UMAR #6', 'Kewajiban pekerja tidak hanya terbatas pada materi dan administrasi, melainkan harus dilandasi rasa kasih sayang kepada orang-orang dalam kekuasaannya, terkhusus perlindungan terhadap orang yang sakit dan lemah.', 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80', 'Empati & Perlindungan Kaum Lemah', 'JRPP Vol 5 No 1 Hlm 11-12')" class="oryzo-card p-6 border border-white/10 hover:border-rose-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-rose-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">6. Perlindungan Sosial &amp; Empati</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Mengasihi bawahan/masyarakat dan memberikan perhatian ekstra pada orang sakit dan lemah.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('7. Tidak Menutup Pintu Bagi Rakyat', 'PRINSIP UMAR #7', 'Sesuai Sabda Rasulullah SAW: Barangsiapa diserahi kekuasaan lalu bersembunyi/menutup pintu dari kebutuhan rakyat, maka Allah akan mengambil jarak darinya. Umar melarang keras pejabat membuat tempat bersembunyi dari aduan rakyat.', 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1200&q=80', 'Aksesibilitas Birokrasi Terbuka', 'Hadis Nabi SAW & Syarat Umar RA')" class="oryzo-card p-6 border border-white/10 hover:border-amber-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-amber-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">7. Pintu Terbuka Untuk Pengaduan</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Dilarang bersembunyi dari aduan warga yang membutuhkan pertolongan birokrasi.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('8. Memfokuskan Diri Untuk Bekerja', 'PRINSIP UMAR #8', 'Umar sangat menjaga agar pejabat/pegawai fokus menjalankan tugas publik dan tidak sibuk dengan bisnis pribadinya. Umar sendiri meninggalkan usaha perdagangannya demi memfokuskan diri penuh mengurus urusan umat Islam.', 'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80', 'Fokus Dedikasi & Bebas Konflik Kepentingan', 'JRPP Vol 5 No 1 Hlm 12')" class="oryzo-card p-6 border border-white/10 hover:border-blue-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-blue-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">8. Fokus Tugas &amp; Dedikasi Utuh</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Fokus penuh melayani publik tanpa terdistraksi oleh urusan bisnis/pribadi.
+                        </p>
+                    </div>
+
+                    <div onclick="openCardModal('9. Berusaha Mewujudkan Keamanan', 'PRINSIP UMAR #9', 'Menjaga keamanan daerah agar masyarakat tenang bepergian dan aman atas harta jiwanya. Caranya adalah dengan menerapkan aturan syariah secara tegas terhadap para pelaku kejahatan dan fasik.', 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80', 'Penegakan Hukum Syariah & Ketertiban', 'JRPP Vol 5 No 1 Hlm 12')" class="oryzo-card p-6 border border-white/10 hover:border-emerald-400 transition cursor-pointer">
+                        <div class="flex items-center gap-1 text-emerald-400 text-xs mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <h3 class="font-grotesk font-bold text-white text-base mb-2">9. Mewujudkan Keamanan Publik</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Menjamin ketentraman jiwa dan harta warga melalui penegakan hukum yang adil.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Interactive Detail Popup Modal for Point Cards -->
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 invisible">
+        <div class="modal-content oryzo-card max-w-2xl w-full p-6 sm:p-8 relative border border-brand-accent/40 shadow-2xl overflow-hidden">
+            <!-- Close Button -->
+            <button onclick="closeCardModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-brand-accent flex items-center justify-center text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <span id="modal-badge" class="oryzo-badge mb-3 inline-block">DETAIL POIN</span>
+            <h2 id="modal-title" class="font-grotesk text-2xl sm:text-3xl font-bold text-white mb-3">Judul Poin Detail</h2>
+
+            <!-- Dynamic Header Container (Arabic Verse snippet OR Islamic Banner Image) -->
+            <div id="modal-verse-container" class="hidden mb-4 p-5 rounded-xl bg-gradient-to-r from-amber-950/40 via-emerald-950/30 to-black border border-amber-500/30 text-center relative overflow-hidden">
+                <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-book-quran"></i> DALIL AL-QUR'AN / HADIS
+                </div>
+                <p id="modal-arabic-text" class="font-arabic text-xl sm:text-2xl text-amber-200 leading-loose py-2 dir-rtl"></p>
+                <div id="modal-verse-ref" class="text-xs font-mono text-emerald-400 mt-2 font-semibold"></div>
+            </div>
+
+            <div id="modal-image-container" class="w-full h-48 rounded-xl overflow-hidden mb-4 relative">
+                <img id="modal-image" src="" alt="Detail Preview" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                <div class="absolute bottom-3 left-4 right-4 flex justify-between items-center text-xs font-grotesk text-amber-300">
+                    <span id="modal-tag">Tag Subkategori</span>
+                    <span id="modal-ref" class="font-mono text-gray-300">Referensi</span>
+                </div>
+            </div>
+
+            <p id="modal-desc" class="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6 font-light">
+                Deskripsi lengkap mengenai poin yang dipilih.
+            </p>
+
+            <div class="flex justify-end">
+                <button onclick="closeCardModal()" class="px-5 py-2.5 rounded-lg bg-brand-accent hover:bg-orange-600 text-white font-grotesk font-bold text-xs uppercase tracking-wider transition">
+                    Tutup Penjelasan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openCardModal(title, badge, desc, image, tag, ref, arabicSnippet) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-badge').innerText = badge;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-image').src = image;
+            document.getElementById('modal-tag').innerText = tag;
+            document.getElementById('modal-ref').innerText = ref;
+
+            const verseBox = document.getElementById('modal-verse-container');
+            const imgBox = document.getElementById('modal-image-container');
+
+            if (arabicSnippet) {
+                document.getElementById('modal-arabic-text').innerText = arabicSnippet;
+                document.getElementById('modal-verse-ref').innerText = ref;
+                verseBox.classList.remove('hidden');
+                imgBox.classList.add('hidden');
+            } else {
+                verseBox.classList.add('hidden');
+                imgBox.classList.remove('hidden');
+            }
+
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('active');
+        }
+
+        function closeCardModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('active');
+        }
+
+        // Close Modal on Esc key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCardModal();
+        });
+
+        /* ===================================================================
+           1. THREE.JS 3D CANVAS RING OBJECT
+           =================================================================== */
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 7);
+
+        // WebGL Renderer
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const pointLight1 = new THREE.PointLight(0xff5522, 3, 50); // Oryzo Accent Orange Light
+        pointLight1.position.set(5, 5, 5);
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0x10b981, 2, 50); // Emerald Light
+        pointLight2.position.set(-5, -5, -2);
+        scene.add(pointLight2);
+
+        // Create 3D Metallic Ring Geometry
+        const ringGroup = new THREE.Group();
+
+        // Outer Torus Ring
+        const ringGeo = new THREE.TorusGeometry(1.8, 0.3, 32, 100);
+        const ringMat = new THREE.MeshStandardMaterial({
+            color: 0x22222a,
+            roughness: 0.2,
+            metalness: 0.8,
+            wireframe: false
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringGroup.add(ringMesh);
+
+        // Inner Glowing Core Ring
+        const innerGeo = new THREE.TorusGeometry(1.4, 0.05, 16, 100);
+        const innerMat = new THREE.MeshBasicMaterial({ color: 0xff5522 });
+        const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+        ringGroup.add(innerMesh);
+
+        scene.add(ringGroup);
+
+        // Mouse Drag / Touch Interactive Rotation
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        window.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+
+                ringGroup.rotation.y += deltaMove.x * 0.008;
+                ringGroup.rotation.x += deltaMove.y * 0.008;
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        // Touch support for mobile
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                ringGroup.rotation.y += 0.01;
+                ringGroup.rotation.x += 0.01;
+            }
+        });
+
+        // Continuous Render Animation Loop
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            // Subtle floating rotation when not dragging
+            if (!isDragging) {
+                ringGroup.rotation.y += 0.005;
+                ringGroup.rotation.x += 0.002;
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // Responsive Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        /* ===================================================================
+           2. PRESENTATION DECK SLIDE CONTROLLER & SMOOTH NAVIGATION
+           =================================================================== */
+        const slides = document.querySelectorAll('.slide-section');
+        const totalSlides = slides.length;
+        let currentSlideIndex = 0;
+        let isAutoplay = false;
+        let autoplayTimer = null;
+
+        // IntersectionObserver to sync slide counters with scroll & enable section reveal animations
+        const slideObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('slide-active');
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlideIndex = index;
+                    updateSlideUI(index);
+
+                    // Morph 3D ring position & scale based on slide index
+                    animate3DRingForSlide(index);
+                } else {
+                    entry.target.classList.remove('slide-active');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        slides.forEach(slide => slideObserver.observe(slide));
+
+        function updateSlideUI(index) {
+            document.getElementById('currentSlideLabel').innerText = String(index + 1).padStart(2, '0');
+            document.getElementById('totalSlideLabel').innerText = String(totalSlides).padStart(2, '0');
+        }
+
+        function animate3DRingForSlide(index) {
+            if (index === 0) { // Hero
+                ringGroup.position.set(2.2, 0, 0);
+                ringGroup.scale.set(1.2, 1.2, 1.2);
+            } else if (index === 1) { // 4 Daya
+                ringGroup.position.set(-3, -1.5, -2);
+                ringGroup.scale.set(0.8, 0.8, 0.8);
+            } else if (index === 2) { // 5 Rasul
+                ringGroup.position.set(0, 0, -3);
+                ringGroup.scale.set(1.5, 1.5, 1.5);
+            } else if (index === 3) { // Etos Kerja
+                ringGroup.position.set(-2.5, 1, -1);
+                ringGroup.scale.set(0.9, 0.9, 0.9);
+            } else if (index === 4) { // 5 Tujuan
+                ringGroup.position.set(3, -1, -2);
+                ringGroup.scale.set(0.8, 0.8, 0.8);
+            } else {
+                ringGroup.position.set(0, 0, -1);
+                ringGroup.scale.set(1, 1, 1);
+            }
+        }
+
+        function scrollToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                scrollToSlide(currentSlideIndex + 1);
+            } else {
+                scrollToSlide(0);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                scrollToSlide(currentSlideIndex - 1);
+            }
+        }
+
+        function toggleAutoplay() {
+            const btn = document.getElementById('autoPlayToggle');
+            if (isAutoplay) {
+                clearInterval(autoplayTimer);
+                isAutoplay = false;
+                btn.innerHTML = '<i class="fa-solid fa-play text-xs"></i>';
+            } else {
+                isAutoplay = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause text-xs"></i>';
+                autoplayTimer = setInterval(nextSlide, 7000);
+            }
+        }
+
+        // Keyboard Arrow Key Navigation
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+</html>
